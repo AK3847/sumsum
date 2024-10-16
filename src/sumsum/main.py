@@ -2,7 +2,11 @@ import click
 import os
 import requests
 from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
+from rich.console import Console
+from rich.live import Live
+import ollama
 
+console = Console()
 
 model_dir = os.path.join(os.path.expanduser("~"), ".ollama", "local_summarization")
 model_path = os.path.join(model_dir, "Llama_3.2_3B_fine_tune_summarization.gguf")
@@ -107,6 +111,37 @@ def init():
     else:
         click.echo(f"ModelFile not found!\n Generating Modelfile at {modelfile_path}.")
         generate_model_file()
+
+
+@cli.command()
+@click.argument("text_file", type=click.Path(exists=True))
+@click.option("--verbose",default=False,is_flag=True,show_default=True,help="To show Additional Information")
+def run(text_file, verbose):
+    """
+    Summarize text from a text_file\n
+    Sends the text to Ollama sever via api and prints the response
+    """
+
+    with open(text_file, "r") as f:
+        prompt = f.read()
+
+    with Live(
+        console.status("[bold green]Generating response...[/bold green]"),
+        refresh_per_second=20,
+    ):
+        response = ollama.chat(
+            model="llama3.2:1b", messages=[{"role": "user", "content": f"{prompt}"}]
+        )
+        
+    click.echo("Response from Model:\n")
+    click.echo(response["message"]["content"])
+    click.echo("\n")
+
+    if verbose:
+        click.echo("Additional Information:\n")
+        click.echo(f'Model Load Duration: {int(response['load_duration'])/1e9:.2f}s')
+        click.echo(f'Total Response Duration: {int(response['total_duration'])/1e9:.2f}s')
+        click.echo(f'Tokens Generated: {int(response['eval_count'])}')
 
 
 def main():
