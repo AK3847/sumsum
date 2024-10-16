@@ -11,6 +11,7 @@ console = Console()
 model_dir = os.path.join(os.path.expanduser("~"), ".ollama", "local_summarization")
 model_path = os.path.join(model_dir, "Llama_3.2_3B_fine_tune_summarization.gguf")
 modelfile_path = os.path.join(model_dir, "ModelFile")
+model_name = "sum_model"
 
 
 def download_model():
@@ -112,10 +113,42 @@ def init():
         click.echo(f"ModelFile not found!\n Generating Modelfile at {modelfile_path}.")
         generate_model_file()
 
+    click.echo("Searching Model on Ollama server....")
+    model_list = ollama.list()
+    model_list = model_list["models"]
+    for i in range(len(model_list)):
+        if f"{model_name}:latest" == model_list[i]["name"]:
+            click.echo(
+                "Model already exists on Ollama server\nUse 'sumsum run' for summarization "
+            )
+            return
+
+    click.echo(f"Model {model_name} is not available on Ollama server")
+    with open(modelfile_path, "r") as f:
+        modelfile = f.read()
+    try:
+        with Live(
+            console.status(
+                "[bold green]Integrating Model with Ollama server...[/bold green]"
+            )
+        ):
+            ollama.create(model=model_name, modelfile=modelfile)
+        click.echo(
+            f"Model {model_name} succesfully integrated with Ollama server!\nUse 'sumsum run' for summarization"
+        )
+    except Exception as e:
+        click.echo(f"Couldn't integrate the model with Ollama Server due to error: {e}")
+
 
 @cli.command()
 @click.argument("text_file", type=click.Path(exists=True))
-@click.option("--verbose",default=False,is_flag=True,show_default=True,help="To show Additional Information")
+@click.option(
+    "--verbose",
+    default=False,
+    is_flag=True,
+    show_default=True,
+    help="To show Additional Information",
+)
 def run(text_file, verbose):
     """
     Summarize text from a text_file\n
@@ -130,18 +163,20 @@ def run(text_file, verbose):
         refresh_per_second=20,
     ):
         response = ollama.chat(
-            model="llama3.2:1b", messages=[{"role": "user", "content": f"{prompt}"}]
+            model=f"{model_name}", messages=[{"role": "user", "content": f"{prompt}"}]
         )
-        
+
     click.echo("Response from Model:\n")
     click.echo(response["message"]["content"])
     click.echo("\n")
 
     if verbose:
         click.echo("Additional Information:\n")
-        click.echo(f'Model Load Duration: {int(response['load_duration'])/1e9:.2f}s')
-        click.echo(f'Total Response Duration: {int(response['total_duration'])/1e9:.2f}s')
-        click.echo(f'Tokens Generated: {int(response['eval_count'])}')
+        click.echo(f"Model Load Duration: {int(response['load_duration'])/1e9:.2f}s")
+        click.echo(
+            f"Total Response Duration: {int(response['total_duration'])/1e9:.2f}s"
+        )
+        click.echo(f"Tokens Generated: {int(response['eval_count'])}")
 
 
 def main():
