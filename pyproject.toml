@@ -10,6 +10,7 @@ dependencies = [
     "rich>=13.9.2",
     "huggingface>=0.0.1",
     "requests>=2.32.3",
+    "ollama>=0.3.3",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
