@@ -5,12 +5,12 @@ from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
 
 
 model_dir = os.path.join(os.path.expanduser("~"), ".ollama", "local_summarization")
-model_path = os.path.join(model_dir, "llama_test.gguf")
+model_path = os.path.join(model_dir, "Llama_3.2_3B_fine_tune_summarization.gguf")
 modelfile_path = os.path.join(model_dir, "ModelFile")
 
 
 def download_model():
-    url = "https://huggingface.co/hugging-quants/Llama-3.2-1B-Instruct-Q4_K_M-GGUF/resolve/main/llama-3.2-1b-instruct-q4_k_m.gguf"
+    url = "https://huggingface.co/AKT47/Llama_3.2_3B_fine_tune_summarization/resolve/main/unsloth.Q8_0.gguf"
 
     try:
         with requests.get(url, stream=True) as r:
@@ -35,9 +35,23 @@ def download_model():
 
 
 def generate_model_file():
+    url = "https://huggingface.co/AKT47/Llama_3.2_3B_fine_tune_summarization/resolve/main/Modelfile"
     try:
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            with open(modelfile_path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=2048):
+                    f.write(chunk)
+
+        with open(modelfile_path, "r") as f:
+            lines = f.readlines()
+
+        lines[0] = ""
+        lines[1] = f"FROM {model_path}\n"
+
         with open(modelfile_path, "w") as f:
-            f.write("Test")
+            f.writelines(lines)
+
         click.echo("ModelFile Generated!")
     except Exception as e:
         click.echo(f"An erro occurred while creating the ModelFile: {e}")
