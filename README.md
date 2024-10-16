@@ -25,6 +25,6 @@ pip install sumsum
   ```
 - you can also use the flag `--verbose` to get additional information:
   (time taken to load the model, time taken for generating new tokens,number of generated tokens etc)
-  `terminal
-    sumsum run path\to\file --verbose
-    `
+  ```terminal
+  sumsum run path\to\file --verbose
+  ```
