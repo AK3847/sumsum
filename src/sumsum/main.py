@@ -5,6 +5,7 @@ from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
 from rich.console import Console
 from rich.live import Live
 import ollama
+from rich.prompt import Confirm
 
 console = Console()
 
@@ -12,6 +13,14 @@ model_dir = os.path.join(os.path.expanduser("~"), ".ollama", "local_summarizatio
 model_path = os.path.join(model_dir, "Llama_3.2_3B_fine_tune_summarization.gguf")
 modelfile_path = os.path.join(model_dir, "ModelFile")
 model_name = "sum_model"
+
+
+rich_color_teal = "555555"
+rich_color_green = "00f200"
+rich_color_red = "a7232e"
+rich_color_white = "bfbfbf"
+rich_color_turqoise = "11a8cd"
+rich_color_yellow = "f2f200"
 
 
 def download_model():
@@ -23,20 +32,28 @@ def download_model():
             total_size = int(r.headers.get("content-length", 0))
             progress = Progress(
                 TextColumn("[progress.description]{task.description}"),
-                BarColumn(),
+                BarColumn(
+                    bar_width=None,
+                    complete_style=f"#{rich_color_red}",
+                    finished_style=f"#{rich_color_green}",
+                ),
                 TextColumn("[progress.percentage]{task.percentage:>3.1f}%"),
                 TimeRemainingColumn(),
             )
-            task = progress.add_task("Downloading", total=total_size)
+            task = progress.add_task(
+                f"[#{rich_color_turqoise}]Downloading", total=total_size
+            )
 
             with progress:
                 with open(model_path, "wb") as f:
                     for chunk in r.iter_content(chunk_size=2048):
                         f.write(chunk)
                         progress.update(task, advance=len(chunk))
-        click.echo(f"Model downlaoded succesfully and saved as {model_path}")
+        console.print(
+            f"[#{rich_color_teal}]Model downlaoded succesfully and saved as [italic #{rich_color_white}]{model_path}"
+        )
     except Exception as e:
-        click.echo(f"An error occured while downloading: {e}")
+        console.print(f"[#{rich_color_red}]An error occured while downloading: {e}")
 
 
 def generate_model_file():
@@ -81,63 +98,86 @@ def init():
     -
     """
 
-    click.echo("Checking for Ollama......")
-    if os.system("ollama --version") == 0:
-        click.echo("Ollama is installed!")
+    console.print(f"[#{rich_color_teal}]Checking for Ollama.....")
+    if os.system("ollama --version >nul 2>&1") == 0:
+        console.print(f"[#{rich_color_green}]Ollama is installed!")
     else:
-        click.echo(
-            """Ollama is not installed! \nPlease install the latest version from: https://ollama.com/download"""
+        console.print(
+            f"[#{rich_color_red}]Ollama is not installed!\nPlease install the latest version for your OS from: [#{rich_color_white}]Please install the latest version from: https://ollama.com/download"
         )
         return
 
-    click.echo("Checking if model is already downloaded or not...")
+    console.print(
+        f"[#{rich_color_teal}]Checking if model is already downloaded or not....."
+    )
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
     if os.path.exists(model_path):
-        click.echo(f"Model already downloaded at {model_path}")
+        console.print(
+            f"[#{rich_color_green}]Model already downloaded at [italic #{rich_color_white}]{model_path}"
+        )
     else:
-        click.echo("Downloading Model......")
+        console.print(f"[#{rich_color_teal}Downloading Model.....]")
         download_model()
 
-    click.echo("Checking for Modelfile....")
+    console.print(f"[#{rich_color_teal}]Checking for Modelfile.....")
     if os.path.exists(modelfile_path):
-        click.echo(f"ModelFile already exists at {modelfile_path}.")
-        if click.confirm(
-            "Do you want to overwrite the existing ModelFile?", default=False
+        console.print(
+            f"[#{rich_color_green}]ModelFile already exists at [italic #{rich_color_white}]{modelfile_path}."
+        )
+        if Confirm.ask(
+            f"[#{rich_color_teal}]Do you want to overwrite the existing ModelFile?",
+            show_choices=True,
+            default=False,
+            show_default=False,
         ):
-            click.echo("Overwriting ModelFile...")
+            console.print(f"[#{rich_color_teal}]Overwriting ModelFile.....")
             generate_model_file()
         else:
-            click.echo("Using the existing ModelFile.")
+            console.print(f"[#{rich_color_teal}]Using the existing ModelFile.")
     else:
-        click.echo(f"ModelFile not found!\n Generating Modelfile at {modelfile_path}.")
+        console.print(
+            f"[#{rich_color_red}]ModelFile not found!\n Generating Modelfile at {modelfile_path}."
+        )
         generate_model_file()
 
-    click.echo("Searching Model on Ollama server....")
+    console.print(f"[#{rich_color_teal}]Searching Model on Ollama server.....")
     model_list = ollama.list()
     model_list = model_list["models"]
     for i in range(len(model_list)):
         if f"{model_name}:latest" == model_list[i]["name"]:
-            click.echo(
-                "Model already exists on Ollama server\nUse 'sumsum run' for summarization "
+            console.print(
+                f"[#{rich_color_green}]Model [italic bold #{rich_color_white}]{model_name}[/italic bold #{rich_color_white}] already exists on Ollama server!"
+            )
+            console.print(
+                f"[#{rich_color_green}]Use [italic bold #{rich_color_white}]'sumsum run'[/italic bold #{rich_color_white}] for summarization"
             )
             return
 
-    click.echo(f"Model {model_name} is not available on Ollama server")
+    console.print(
+        f"[#{rich_color_red}]Model [italic bold #{rich_color_white}]{model_name}[/italic bold #{rich_color_white}] is not available on Ollama server"
+    )
+
     with open(modelfile_path, "r") as f:
         modelfile = f.read()
     try:
         with Live(
             console.status(
-                "[bold green]Integrating Model with Ollama server...[/bold green]"
-            )
+                f"[#{rich_color_turqoise}]Integrating Model with Ollama server....."
+            ),
+            transient=True,
         ):
             ollama.create(model=model_name, modelfile=modelfile)
-        click.echo(
-            f"Model {model_name} succesfully integrated with Ollama server!\nUse 'sumsum run' for summarization"
+        console.print(
+            f"[#{rich_color_green}]Model [italic bold #{rich_color_white}]{model_name}[/italic bold #{rich_color_white}] succesfully integrated with Ollama server!"
+        )
+        console.print(
+            f"[#{rich_color_green}]Use [italic bold #{rich_color_white}]'sumsum run'[/italic bold #{rich_color_white}] for summarization "
         )
     except Exception as e:
-        click.echo(f"Couldn't integrate the model with Ollama Server due to error: {e}")
+        console.print(
+            f"[#{rich_color_red}]Couldn't integrate the model with Ollama Server due to error: {e}"
+        )
 
 
 @cli.command()
@@ -159,24 +199,40 @@ def run(text_file, verbose):
         prompt = f.read()
 
     with Live(
-        console.status("[bold green]Generating response...[/bold green]"),
+        console.status(
+            f"[#{rich_color_turqoise}]Generating response...[/#{rich_color_turqoise}]"
+        ),
         refresh_per_second=20,
+        transient=True,
     ):
         response = ollama.chat(
-            model=f"{model_name}", messages=[{"role": "user", "content": f"{prompt}"}]
+            model=f"{model_name}",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Summarize the given user content as precise as possible",
+                },
+                {"role": "user", "content": f"{prompt}"},
+            ],
         )
 
-    click.echo("Response from Model:\n")
-    click.echo(response["message"]["content"])
-    click.echo("\n")
+    console.print(f"[#{rich_color_yellow}]Response from model:\n")
+    console.print(f"[#{rich_color_white}]{response['message']['content']}\n")
 
     if verbose:
-        click.echo("Additional Information:\n")
-        click.echo(f"Model Load Duration: {int(response['load_duration'])/1e9:.2f}s")
-        click.echo(
-            f"Total Response Duration: {int(response['total_duration'])/1e9:.2f}s"
+        console.print(f"[#{rich_color_yellow}]Additional Information:\n")
+        console.print(
+            f"[#{rich_color_white}]Model load duration: {int(response['load_duration'])/1e9:.2f}s"
         )
-        click.echo(f"Tokens Generated: {int(response['eval_count'])}")
+        console.print(
+            f"[#{rich_color_white}]Total response duration: {int(response['load_duration'])/1e9:.2f}s"
+        )
+        console.print(
+            f"[#{rich_color_white}]Tokens generated: {int(response['eval_count'])}"
+        )
+        console.print(
+            f"[#{rich_color_white}]Speed of generation (Tokens/second): {int(response['eval_count'])/(int(response['eval_duration'])/1e9):.2f}"
+        )
 
 
 def main():
