@@ -8,6 +8,8 @@ authors = [
 dependencies = [
     "click>=8.1.7",
     "rich>=13.9.2",
+    "huggingface>=0.0.1",
+    "requests>=2.32.3",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
@@ -25,3 +27,6 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sumsum"]
+
+[project.scripts]
+sumsum = "sumsum.main:main"

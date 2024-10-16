@@ -10,9 +10,15 @@
 #   universal: false
 
 -e file:.
+certifi==2024.8.30
+charset-normalizer==3.4.0
 click==8.1.7
 colorama==0.4.6
+huggingface==0.0.1
+idna==3.10
 markdown-it-py==3.0.0
 mdurl==0.1.2
 pygments==2.18.0
+requests==2.32.3
 rich==13.9.2
+urllib3==2.2.3
