@@ -1,12 +1,15 @@
 import click
 import os
 import requests
+import subprocess
+import ollama
+
 from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
 from rich.console import Console
 from rich.live import Live
-import ollama
 from rich.prompt import Confirm
 
+ollama_client = ollama.Client()
 console = Console()
 
 model_dir = os.path.join(os.path.expanduser("~"), ".ollama", "local_summarization")
@@ -107,6 +110,11 @@ def init():
         )
         return
 
+    ## To start the ollama application.
+    subprocess.Popen(
+        ["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+
     console.print(
         f"[#{rich_color_teal}]Checking if model is already downloaded or not....."
     )
@@ -142,7 +150,7 @@ def init():
         generate_model_file()
 
     console.print(f"[#{rich_color_teal}]Searching Model on Ollama server.....")
-    model_list = ollama.list()
+    model_list = ollama_client.list()
     model_list = model_list["models"]
     for i in range(len(model_list)):
         if f"{model_name}:latest" == model_list[i]["name"]:
@@ -167,7 +175,7 @@ def init():
             ),
             transient=True,
         ):
-            ollama.create(model=model_name, modelfile=modelfile)
+            ollama_client.create(model=model_name, modelfile=modelfile)
         console.print(
             f"[#{rich_color_green}]Model [italic bold #{rich_color_white}]{model_name}[/italic bold #{rich_color_white}] succesfully integrated with Ollama server!"
         )
@@ -195,6 +203,10 @@ def run(text_file, verbose):
     Sends the text to Ollama sever via api and prints the response
     """
 
+    subprocess.Popen(
+        ["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+
     with open(text_file, "r") as f:
         prompt = f.read()
 
@@ -205,7 +217,7 @@ def run(text_file, verbose):
         refresh_per_second=20,
         transient=True,
     ):
-        response = ollama.chat(
+        response = ollama_client.chat(
             model=f"{model_name}",
             messages=[
                 {
