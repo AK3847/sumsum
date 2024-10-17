@@ -12,7 +12,7 @@ pip install sumsum
 
 ## Setup:
 
-- Run the `init` command to check dependency download model and generate modelfile:
+- Run the `init` command to check dependency, download model and generate modelfile:
   ```terminal
   sumsum init
   ```
@@ -21,10 +21,10 @@ pip install sumsum
 
 - Use the command `run` with your text file path:
   ```terminal
-  sumsum run path\to\file
+  sumsum run path\to\file.txt
   ```
 - you can also use the flag `--verbose` to get additional information:
   (time taken to load the model, time taken for generating new tokens,number of generated tokens etc)
   ```terminal
-  sumsum run path\to\file --verbose
+  sumsum run path\to\file.txt --verbose
   ```

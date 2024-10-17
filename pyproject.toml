@@ -1,7 +1,7 @@
 [project]
 name = "sumsum"
 version = "0.1.0"
-description = "Add your description here"
+description = "Minimal CLI tool to summarize any text locally with help of LLM!"
 authors = [
     { name = "AK3847", email = "abdulkadir.co21d2@scet.ac.in" }
 ]
@@ -14,6 +14,7 @@ dependencies = [
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
+homepage  = "https://github.com/AK3847/sumsum"
 
 [build-system]
 requires = ["hatchling"]
