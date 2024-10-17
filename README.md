@@ -7,7 +7,7 @@ Built around [Ollama](https://github.com/ollama/ollama-python) and [fine-tuned v
 ## Installation:
 
 ```terminal
-pip install sumsum
+pip install sum-sum
 ```
 
 ## Setup:

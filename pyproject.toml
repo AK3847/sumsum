@@ -1,10 +1,12 @@
 [project]
-name = "sumsum"
+name = "sum-sum"
 version = "0.1.0"
 description = "Minimal CLI tool to summarize any text locally with help of LLM!"
 authors = [
-    { name = "AK3847", email = "abdulkadir.co21d2@scet.ac.in" }
+    {email = "abdulkadir87633@gmail.com"},
+    {name = "Abdul Kadir"}
 ]
+keywords = ["Ollama","Local-LLM","text-summarization"]
 dependencies = [
     "click>=8.1.7",
     "rich>=13.9.2",
@@ -12,8 +14,22 @@ dependencies = [
     "requests>=2.32.3",
     "ollama>=0.3.3",
 ]
+
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Operating System :: Microsoft :: Windows :: Windows 8",
+    "Operating System :: Microsoft :: Windows :: Windows 8.1",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11"
+]
 readme = "README.md"
 requires-python = ">= 3.8"
+
+[project.urls]
 homepage  = "https://github.com/AK3847/sumsum"
 
 [build-system]
@@ -28,7 +44,7 @@ dev-dependencies = []
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/sumsum"]
+packages = ["src/sum_sum"]
 
 [project.scripts]
-sumsum = "sumsum.main:main"
+sumsum = "sum_sum.main:main"
