@@ -1,6 +1,6 @@
 [project]
 name = "sum-sum"
-version = "0.1.0"
+version = "0.1.1"
 description = "Minimal CLI tool to summarize any text locally with help of LLM!"
 authors = [
     {email = "abdulkadir87633@gmail.com"},
