@@ -27,8 +27,7 @@ rich_color_yellow = "f2f200"
 
 
 def download_model():
-    url = "https://huggingface.co/AKT47/Llama_3.2_3B_fine_tune_summarization/resolve/main/unsloth.Q8_0.gguf"
-
+    url = "https://huggingface.co/AKT47/Llama_3.2_3B_fine_tune_sum/resolve/main/unsloth.BF16.gguf"
     try:
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
@@ -207,7 +206,7 @@ def run(text_file, verbose):
         ["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
 
-    with open(text_file, "r") as f:
+    with open(text_file, "r", encoding="utf-8") as f:
         prompt = f.read()
 
     with Live(
@@ -237,7 +236,7 @@ def run(text_file, verbose):
             f"[#{rich_color_white}]Model load duration: {int(response['load_duration'])/1e9:.2f}s"
         )
         console.print(
-            f"[#{rich_color_white}]Total response duration: {int(response['load_duration'])/1e9:.2f}s"
+            f"[#{rich_color_white}]Total response duration: {int(response['eval_duration'])/1e9:.2f}s"
         )
         console.print(
             f"[#{rich_color_white}]Tokens generated: {int(response['eval_count'])}"
